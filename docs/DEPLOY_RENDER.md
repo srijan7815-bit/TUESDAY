@@ -28,7 +28,7 @@ openssl rand -hex 32   # use as TUESDAY_ACCESS_TOKEN
 1. In Render, choose **New → Blueprint** and connect the GitHub repository.
 2. Confirm that both resources use the `free` plan and choose the same region.
 3. Enter the prompted values for `TUESDAY_ACCESS_TOKEN`, `NVIDIA_API_KEY`, and `E2B_API_KEY`.
-4. Apply the Blueprint. Render runs the Blueprint `preDeployCommand` (`alembic upgrade head`) before it replaces the live service.
+4. Apply the Blueprint. Free web services do not support Render's `preDeployCommand`, so the container runs `alembic upgrade head` immediately before starting Uvicorn.
 
 The service automatically receives the PostgreSQL connection string and Render's `PORT`. Production validation refuses to start if the database, credentials, access controls, or sandbox provider are unsafe.
 

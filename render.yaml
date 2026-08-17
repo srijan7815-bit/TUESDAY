@@ -11,10 +11,8 @@ services:
     plan: free
     dockerfilePath: ./services/api/Dockerfile
     dockerContext: ./services/api
-    preDeployCommand: alembic upgrade head
     healthCheckPath: /health/ready
     autoDeployTrigger: checksPass
-    maxShutdownDelaySeconds: 30
     envVars:
       - key: TUESDAY_ENV
         value: production

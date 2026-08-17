@@ -26,6 +26,16 @@ def main() -> int:
     service = render["services"][0]
     if service.get("healthCheckPath") != "/health/ready":
         raise ValueError("Render readiness path is missing")
+    if service.get("plan") == "free":
+        unsupported = {"preDeployCommand", "maxShutdownDelaySeconds"} & service.keys()
+        if unsupported:
+            names = ", ".join(sorted(unsupported))
+            raise ValueError(f"Render free tier does not support: {names}")
+        dockerfile = (ROOT / "services" / "api" / "Dockerfile").read_text(
+            encoding="utf-8"
+        )
+        if "alembic upgrade head && exec uvicorn" not in dockerfile:
+            raise ValueError("Free Render startup must migrate before serving")
     env = {item["key"]: item for item in service.get("envVars", [])}
     for secret in ("TUESDAY_ACCESS_TOKEN", "NVIDIA_API_KEY", "E2B_API_KEY"):
         if env.get(secret, {}).get("sync") != "false":
