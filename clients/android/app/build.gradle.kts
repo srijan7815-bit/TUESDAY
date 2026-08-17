@@ -6,6 +6,10 @@ android {
     namespace = "ai.tuesday.client"
     compileSdk = 36
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "ai.tuesday.client"
         minSdk = 26
