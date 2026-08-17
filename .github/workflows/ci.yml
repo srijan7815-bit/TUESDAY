@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/api/requirements-dev.txt
+      - name: Install backend dependencies
+        run: python -m pip install --disable-pip-version-check -r services/api/requirements-dev.txt
+      - name: Lint and type-check
+        env:
+          PYTHONPATH: services/api
+        run: |
+          ruff check services/api/app services/api/migrations services/api/tests
+          ruff format --check services/api/app services/api/migrations services/api/tests
+          mypy services/api/app --ignore-missing-imports --show-error-codes
+      - name: Test backend
+        env:
+          PYTHONPATH: services/api
+        run: pytest -q services/api/tests
+      - name: Verify migrations
+        working-directory: services/api
+        env:
+          TUESDAY_DATABASE_URL: sqlite+aiosqlite:////tmp/tuesday-ci-migrations.db
+        run: |
+          alembic upgrade head
+          alembic downgrade base
+          alembic upgrade head
+      - name: Check committed files for credentials
+        run: |
+          python scripts/check-secrets.py
+          python scripts/validate-config.py
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Parse browser scripts
+        run: |
+          node --check services/api/app/static/app.js
+          node --check services/api/app/static/service-worker.js
+          node --check services/api/app/static/offline.js
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK 36
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Test, lint, and build APK
+        working-directory: clients/android
+        run: gradle --no-daemon testDebugUnitTest lintDebug assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tuesday-android-debug
+          path: clients/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate and build Linux Lite package
+        run: |
+          bash -n clients/linux/src/tuesday-desktop clients/linux/build-deb.sh clients/linux/test.sh
+          clients/linux/src/tuesday-desktop --version
+          clients/linux/test.sh
+          dpkg-deb --info clients/linux/dist/tuesday-desktop_1.0.0_all.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tuesday-linux-lite
+          path: |
+            clients/linux/dist/*.deb
+            clients/linux/dist/*.sha256
+          if-no-files-found: error
+          retention-days: 14

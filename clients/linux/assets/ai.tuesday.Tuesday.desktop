@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=TUESDAY
+Comment=Secure desktop client for the TUESDAY personal agent
+Exec=tuesday-desktop
+Icon=ai.tuesday.Tuesday
+Terminal=false
+Categories=Network;Utility;
+StartupNotify=true
+StartupWMClass=TUESDAY
+Keywords=assistant;agent;workspace;

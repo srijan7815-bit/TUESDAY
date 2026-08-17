@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Require Android signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.TUESDAY_ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.TUESDAY_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.TUESDAY_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.TUESDAY_ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          test -n "$KEYSTORE_PASSWORD"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/tuesday-release.jks"
+      - name: Build signed Android release
+        working-directory: clients/android
+        env:
+          TUESDAY_ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/tuesday-release.jks
+          TUESDAY_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.TUESDAY_ANDROID_KEYSTORE_PASSWORD }}
+          TUESDAY_ANDROID_KEY_ALIAS: ${{ secrets.TUESDAY_ANDROID_KEY_ALIAS }}
+          TUESDAY_ANDROID_KEY_PASSWORD: ${{ secrets.TUESDAY_ANDROID_KEY_PASSWORD }}
+        run: gradle --no-daemon testDebugUnitTest lintRelease assembleRelease
+      - name: Build Linux Lite release
+        env:
+          TUESDAY_VERSION: ${{ github.ref_name }}
+        run: |
+          export TUESDAY_VERSION="${TUESDAY_VERSION#v}"
+          clients/linux/build-deb.sh
+      - name: Stage release assets
+        run: |
+          mkdir -p release
+          cp clients/android/app/build/outputs/apk/release/app-release.apk release/tuesday-android.apk
+          cp clients/linux/dist/*.deb clients/linux/dist/*.sha256 release/
+          sha256sum release/tuesday-android.apk > release/tuesday-android.apk.sha256
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: release/*

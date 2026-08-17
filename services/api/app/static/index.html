@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#020812" />
+  <meta name="description" content="TUESDAY — personal agentic AI assistant" />
+  <title>TUESDAY</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23020812' width='32' height='32'/%3E%3Cpath stroke='%238de8ff' stroke-width='1.5' fill='none' d='M6 6h20v20H6z'/%3E%3Cpath stroke='%238de8ff' stroke-width='1.5' d='M11 11h10M16 11v10'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div id="app">
+    <div class="background-grid" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <button type="button" class="brand" id="btn-new-session" title="Start a new local conversation" aria-label="Start a new conversation">
+        <span class="brand-mark" aria-hidden="true">T</span>
+        <span class="brand-copy">
+          <strong>TUESDAY</strong>
+          <small>Personal agent system</small>
+        </span>
+      </button>
+
+      <div class="header-readout" aria-label="System time">
+        <span>Local</span>
+        <strong id="sys-clock">--:--:--</strong>
+      </div>
+
+      <div class="top-meta">
+        <span class="pill" id="pill-model" title="Active model path">
+          <span class="dot"></span><span id="lbl-model">MODEL —</span>
+        </span>
+        <span class="pill" id="pill-ws" data-state="none" title="Workspace status">
+          <span class="dot"></span><span id="lbl-ws">WS · none</span>
+        </span>
+        <span class="pill pill-conv" id="pill-conv" title="Conversation id"><span id="lbl-conv">CONV —</span></span>
+        <button type="button" class="utility-button" id="btn-motion" aria-pressed="false" title="Reduce interface motion">Motion</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <nav class="system-rail" aria-label="System navigation">
+        <button type="button" class="rail-button active" data-panel-target="panel-comms" title="Communications"><span aria-hidden="true">⌁</span><span>Comms</span></button>
+        <button type="button" class="rail-button" data-panel-target="panel-workspace" title="Remote workspace"><span aria-hidden="true">▣</span><span>Space</span></button>
+        <button type="button" class="rail-button" data-panel-target="panel-memory" title="Memory"><span aria-hidden="true">◈</span><span>Memory</span></button>
+        <div class="rail-index" aria-hidden="true"><span>SYS</span><strong>01</strong></div>
+      </nav>
+
+      <section class="chat-column" aria-label="TUESDAY communications">
+        <div class="chat-panel hud-frame" id="panel-comms">
+          <span class="corner-tr"></span><span class="corner-bl"></span>
+          <div class="panel-title comms-title">
+            <div><span class="eyebrow">Primary channel</span><h2>Communications</h2></div>
+            <div class="panel-readout"><span class="live-pip" aria-hidden="true"></span><span id="stream-state">idle</span></div>
+          </div>
+          <div class="channel-strip" aria-label="Conversation details">
+            <span><i>01</i> Agent dialogue</span><span><i>02</i> Tools approval-gated</span><span><i>03</i> Workspace on demand</span>
+          </div>
+          <div class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+          <form class="composer" id="composer">
+            <div class="composer-label"><span>Input buffer</span><small>Enter to transmit · Shift + Enter for newline</small></div>
+            <textarea id="input" rows="2" placeholder="What should TUESDAY help you build, inspect, or solve?" autocomplete="off" aria-label="Message for TUESDAY"></textarea>
+            <div class="btn-col">
+              <button type="submit" id="btn-send"><span>Transmit</span><b aria-hidden="true">↗</b></button>
+              <button type="button" class="ghost" id="btn-stop" disabled>Abort stream</button>
+            </div>
+            <div class="media-tools" aria-label="Voice and attachment controls">
+              <button type="button" class="ghost" id="btn-attach">Attach file</button>
+              <button type="button" class="ghost" id="btn-record" aria-pressed="false">Push to talk</button>
+              <button type="button" class="ghost" id="btn-voice" aria-pressed="false">Voice output off</button>
+              <input id="file-input" type="file" accept="image/*,audio/*,.txt,.md,.json,.pdf,.zip" hidden />
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <aside class="side-column" aria-label="System status and workspace">
+        <section class="status-card hud-frame" id="panel-status" aria-labelledby="status-heading">
+          <span class="corner-tr"></span><span class="corner-bl"></span>
+          <div class="status-heading">
+            <div><span class="eyebrow">Operator telemetry</span><h2 id="status-heading">Status</h2></div>
+            <span class="status-code">T-01</span>
+          </div>
+          <div class="status-level">
+            <div class="lvl" id="stat-level">01</div>
+            <div class="lvl-meta"><span>Level</span><strong id="stat-title">Operator</strong><span>Class: <b id="stat-job">Agent</b></span></div>
+            <div class="signal-orbit" aria-hidden="true"><i></i></div>
+          </div>
+          <div class="resource-bars" aria-label="Runtime meters">
+            <div class="bar-row"><span>Link</span><div class="bar-track"><div class="bar-fill" id="bar-hp"></div></div><span class="bar-val" id="val-hp">—</span></div>
+            <div class="bar-row"><span>Flow</span><div class="bar-track"><div class="bar-fill" id="bar-mp"></div></div><span class="bar-val" id="val-mp">—</span></div>
+            <div class="bar-row"><span>Load</span><div class="bar-track"><div class="bar-fill" id="bar-cpu"></div></div><span class="bar-val" id="val-cpu">0%</span></div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat"><span class="icon">◇</span> STR <strong id="s-str">—</strong></div><div class="stat"><span class="icon">◌</span> VIT <strong id="s-vit">—</strong></div>
+            <div class="stat"><span class="icon">↯</span> AGI <strong id="s-agi">—</strong></div><div class="stat"><span class="icon">◉</span> INT <strong id="s-int">—</strong></div>
+            <div class="stat"><span class="icon">◫</span> PER <strong id="s-per">—</strong></div><div class="stat"><span class="icon">⌘</span> CTX <strong id="s-ctx">0</strong></div>
+          </div>
+          <div class="ability-points"><span>Available capacity</span><strong id="stat-ap">12</strong></div>
+        </section>
+
+        <section class="desktop-panel hud-frame" id="panel-workspace" aria-labelledby="workspace-heading">
+          <span class="corner-tr"></span><span class="corner-bl"></span>
+          <div class="panel-title desktop-title">
+            <div><span class="eyebrow">Isolated environment</span><h2 id="workspace-heading">Remote workspace</h2></div>
+            <span class="window-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+          <div class="desktop-toolbar" aria-label="Workspace controls">
+            <button type="button" class="ghost" id="btn-ws-start">Start</button><button type="button" class="ghost" id="btn-ws-stop">Stop</button><button type="button" class="ghost" id="btn-ws-shot">Capture</button><button type="button" class="ghost" id="btn-ws-refresh">Refresh</button>
+          </div>
+          <div class="desktop-view" id="desktop-view">
+            <div class="screen-reticle" aria-hidden="true"></div>
+            <div class="placeholder" id="desktop-placeholder"><span class="placeholder-icon" aria-hidden="true">▣</span><strong>Workspace standby</strong><small>Start computer access to open the live screen.</small></div>
+            <img id="desktop-img" alt="Workspace screenshot" hidden />
+          </div>
+          <div class="desktop-meta" id="desktop-meta">provider: — · status: none</div>
+        </section>
+
+        <section class="memory-panel hud-frame" id="panel-memory" aria-labelledby="memory-heading">
+          <span class="corner-tr"></span><span class="corner-bl"></span>
+          <div class="panel-title"><div><span class="eyebrow">Explicit profile store</span><h2 id="memory-heading">Memory</h2></div><button type="button" class="ghost" id="btn-mem-refresh">Reload</button></div>
+          <div class="memory-list" id="memory-list">No entries</div>
+          <div class="approval-block">
+            <div class="approval-heading"><span>Pending approvals</span><button type="button" class="ghost" id="btn-approval-refresh">Reload</button></div>
+            <div class="approval-list" id="approval-list">No pending actions</div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="modal-root" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="notification hud-frame"><span class="corner-tr"></span><span class="corner-bl"></span>
+      <div class="n-title" id="modal-title"><span aria-hidden="true">◉</span> System notification</div>
+      <div class="n-body" id="modal-body">Confirm action?</div>
+      <div class="n-actions"><button type="button" id="modal-yes">Authorize</button><button type="button" id="modal-no">Cancel</button></div>
+    </div>
+  </div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="auth-gate" id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title" hidden>
+    <form class="auth-card hud-frame" id="auth-form">
+      <span class="corner-tr"></span><span class="corner-bl"></span>
+      <span class="eyebrow">Protected personal deployment</span>
+      <h1 id="auth-title">Authorize TUESDAY</h1>
+      <p>Enter the access token configured on the server. It is exchanged for a secure session cookie and is not stored in this client.</p>
+      <label for="auth-token">Access token</label>
+      <input id="auth-token" type="password" autocomplete="current-password" required maxlength="512" />
+      <button type="submit">Open console</button>
+      <div class="auth-error" id="auth-error" role="alert"></div>
+    </form>
+  </div>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

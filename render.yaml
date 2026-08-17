@@ -1,0 +1,50 @@
+databases:
+  - name: tuesday-db
+    databaseName: tuesday
+    user: tuesday
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: tuesday-agent
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./services/api/Dockerfile
+    dockerContext: ./services/api
+    preDeployCommand: alembic upgrade head
+    healthCheckPath: /health/ready
+    autoDeployTrigger: checksPass
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: TUESDAY_ENV
+        value: production
+      - key: TUESDAY_DATABASE_URL
+        fromDatabase:
+          name: tuesday-db
+          property: connectionString
+      - key: TUESDAY_SECRET_KEY
+        generateValue: true
+      - key: TUESDAY_ACCESS_TOKEN
+        sync: false
+      - key: TUESDAY_ALLOW_MOCK_MODEL
+        value: "false"
+      - key: TUESDAY_CORS_ORIGINS
+        value: ""
+      - key: TUESDAY_ALLOWED_HOSTS
+        value: "localhost,127.0.0.1,*.onrender.com"
+      - key: TUESDAY_DATA_DIR
+        value: /tmp/tuesday
+      - key: STORAGE_LOCAL_PATH
+        value: /tmp/tuesday/storage
+      - key: SANDBOX_PROVIDER
+        value: e2b
+      - key: E2B_API_KEY
+        sync: false
+      - key: E2B_TIMEOUT_SEC
+        value: "3600"
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: STT_PROVIDER
+        value: none
+      - key: TTS_PROVIDER
+        value: none

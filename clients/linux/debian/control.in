@@ -1,0 +1,11 @@
+Package: tuesday-desktop
+Version: @VERSION@
+Section: net
+Priority: optional
+Architecture: all
+Depends: python3, ca-certificates, chromium | chromium-browser | google-chrome-stable | firefox
+Recommends: curl, zenity
+Maintainer: TUESDAY Project <noreply@example.invalid>
+Description: Secure lightweight desktop client for TUESDAY
+ Launches the configured HTTPS TUESDAY backend as a desktop application using
+ the user's maintained system browser. Credentials remain in HttpOnly cookies.

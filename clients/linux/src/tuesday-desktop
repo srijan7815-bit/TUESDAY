@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_VERSION_VALUE="@VERSION@"
+if [[ "${APP_VERSION_VALUE}" == *"@"* ]]; then
+    APP_VERSION_VALUE="${TUESDAY_VERSION:-1.0.0}"
+fi
+readonly APP_VERSION="${APP_VERSION_VALUE}"
+readonly CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/tuesday"
+readonly CONFIG_FILE="${CONFIG_DIR}/backend-url"
+
+usage() {
+    cat <<'EOF'
+Usage: tuesday-desktop [--configure [URL] | --healthcheck | --version | --help]
+
+Opens the configured TUESDAY server in an isolated browser app window.
+Release use requires an HTTPS backend URL.
+EOF
+}
+
+validate_url() {
+    python3 - "$1" <<'PY'
+import sys
+from urllib.parse import urlsplit
+
+try:
+    value = sys.argv[1].strip().rstrip("/")
+    parsed = urlsplit(value)
+    valid = (
+        parsed.scheme == "https"
+        and bool(parsed.hostname)
+        and parsed.username is None
+        and parsed.password is None
+        and parsed.path in ("", "/")
+        and not parsed.query
+        and not parsed.fragment
+    )
+except ValueError:
+    valid = False
+if not valid:
+    raise SystemExit(1)
+print(value)
+PY
+}
+
+configure() {
+    local candidate="${1:-}"
+    if [[ -z "${candidate}" ]] && command -v zenity >/dev/null 2>&1; then
+        candidate="$(zenity --entry --title='TUESDAY setup' \
+            --text='Enter your HTTPS Render backend URL:' \
+            --entry-text='https://tuesday-agent.onrender.com' 2>/dev/null || true)"
+    fi
+    if [[ -z "${candidate}" && -t 0 ]]; then
+        read -r -p "TUESDAY HTTPS backend URL: " candidate
+    fi
+    if [[ -z "${candidate}" ]]; then
+        echo "No backend URL supplied. Run: tuesday-desktop --configure https://your-service.onrender.com" >&2
+        return 2
+    fi
+
+    local normalized
+    if ! normalized="$(validate_url "${candidate}")"; then
+        echo "Invalid URL. Use the HTTPS origin only, without a path, query, or credentials." >&2
+        return 2
+    fi
+    install -d -m 700 "${CONFIG_DIR}"
+    printf '%s\n' "${normalized}" > "${CONFIG_FILE}"
+    chmod 600 "${CONFIG_FILE}"
+    echo "TUESDAY backend saved: ${normalized}"
+}
+
+backend_url() {
+    if [[ ! -r "${CONFIG_FILE}" ]]; then
+        configure
+    fi
+    local value
+    value="$(head -n 1 "${CONFIG_FILE}")"
+    validate_url "${value}" || {
+        echo "The saved backend URL is invalid. Run tuesday-desktop --configure again." >&2
+        return 2
+    }
+}
+
+healthcheck() {
+    local url
+    url="$(backend_url)"
+    command -v curl >/dev/null 2>&1 || {
+        echo "curl is required for --healthcheck" >&2
+        return 127
+    }
+    curl --fail --silent --show-error --max-time 15 \
+        --proto '=https' --tlsv1.2 "${url}/health/ready"
+    printf '\n'
+}
+
+launch() {
+    local url
+    url="$(backend_url)"
+    local browser
+    for browser in chromium chromium-browser google-chrome-stable google-chrome brave-browser; do
+        if command -v "${browser}" >/dev/null 2>&1; then
+            exec "${browser}" --app="${url}" --class=TUESDAY --name=TUESDAY \
+                --disable-background-networking --disable-sync --no-first-run
+        fi
+    done
+    if command -v firefox >/dev/null 2>&1; then
+        exec firefox --new-window "${url}"
+    fi
+    echo "Install Chromium, Chrome, Brave, or Firefox to run TUESDAY." >&2
+    return 127
+}
+
+case "${1:-}" in
+    --configure)
+        configure "${2:-}"
+        ;;
+    --healthcheck)
+        healthcheck
+        ;;
+    --version)
+        echo "tuesday-desktop ${APP_VERSION}"
+        ;;
+    --help|-h)
+        usage
+        ;;
+    "")
+        launch
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

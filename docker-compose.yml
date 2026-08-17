@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      TUESDAY_HOST: 0.0.0.0
+      TUESDAY_PORT: 8000
+      PORT: 8000
+      TUESDAY_DATA_DIR: /data
+      TUESDAY_DATABASE_URL: sqlite+aiosqlite:////data/tuesday.db
+      STORAGE_LOCAL_PATH: /data/storage
+    volumes:
+      - tuesday_data:/data
+    restart: unless-stopped
+
+volumes:
+  tuesday_data:

@@ -1,0 +1,7 @@
+<resources>
+    <color name="tuesday_background">#020812</color>
+    <color name="tuesday_panel">#061321</color>
+    <color name="tuesday_cyan">#9DEEFF</color>
+    <color name="tuesday_text">#E7F6FC</color>
+    <color name="tuesday_muted">#7697A8</color>
+</resources>

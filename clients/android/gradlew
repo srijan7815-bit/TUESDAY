@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+set -eu
+
+GRADLE_VERSION=8.13
+GRADLE_SHA256=20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+CACHE_ROOT="${XDG_CACHE_HOME:-${HOME}/.cache}/tuesday-gradle"
+ARCHIVE="${CACHE_ROOT}/gradle-${GRADLE_VERSION}-bin.zip"
+GRADLE_HOME="${CACHE_ROOT}/gradle-${GRADLE_VERSION}"
+
+if [ ! -x "${GRADLE_HOME}/bin/gradle" ]; then
+    mkdir -p "${CACHE_ROOT}"
+    if [ ! -f "${ARCHIVE}" ]; then
+        command -v curl >/dev/null 2>&1 || {
+            echo "curl is required to bootstrap Gradle" >&2
+            exit 1
+        }
+        curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "${ARCHIVE}.part" \
+            "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+        mv "${ARCHIVE}.part" "${ARCHIVE}"
+    fi
+    printf '%s  %s\n' "${GRADLE_SHA256}" "${ARCHIVE}" | sha256sum --check --status || {
+        echo "Gradle archive checksum verification failed" >&2
+        exit 1
+    }
+    command -v unzip >/dev/null 2>&1 || {
+        echo "unzip is required to bootstrap Gradle" >&2
+        exit 1
+    }
+    unzip -q -o "${ARCHIVE}" -d "${CACHE_ROOT}"
+fi
+
+exec "${GRADLE_HOME}/bin/gradle" "$@"

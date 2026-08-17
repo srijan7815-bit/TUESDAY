@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TUESDAY</string>
+    <string name="setup_title">Connect TUESDAY</string>
+    <string name="setup_hint">https://your-service.onrender.com</string>
+    <string name="setup_explanation">Enter the HTTPS address of your TUESDAY backend. Provider keys remain on the server.</string>
+    <string name="save_and_open">Save and open</string>
+    <string name="invalid_url">Enter a valid HTTPS URL without a path, query, or fragment.</string>
+</resources>

@@ -1,0 +1,31 @@
+{
+  "name": "TUESDAY Personal Agent",
+  "short_name": "TUESDAY",
+  "description": "Private agentic AI console",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020812",
+  "theme_color": "#020812",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/icons/tuesday-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/tuesday-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/tuesday.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
