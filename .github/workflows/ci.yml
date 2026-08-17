@@ -88,7 +88,7 @@ jobs:
             sed -n '1,260p' app/build/reports/lint-results.txt
           fi
           exit "$task_status"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: tuesday-android-debug
           path: clients/android/app/build/outputs/apk/debug/app-debug.apk
@@ -106,7 +106,7 @@ jobs:
           clients/linux/src/tuesday-desktop --version
           clients/linux/test.sh
           dpkg-deb --info clients/linux/dist/tuesday-desktop_1.0.0_all.deb
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: tuesday-linux-lite
           path: |
