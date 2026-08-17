@@ -2,13 +2,13 @@ databases:
   - name: tuesday-db
     databaseName: tuesday
     user: tuesday
-    plan: basic-256mb
+    plan: free
 
 services:
   - type: web
     name: tuesday-agent
     runtime: docker
-    plan: starter
+    plan: free
     dockerfilePath: ./services/api/Dockerfile
     dockerContext: ./services/api
     preDeployCommand: alembic upgrade head

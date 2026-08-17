@@ -12,7 +12,7 @@ Private agentic AI console with a FastAPI backend, responsive installable HUD, c
 - Android 8+ client targeting API 36 with an HTTPS-only release WebView, same-origin policy, microphone/file flows, and protected artifact downloads.
 - Lightweight Linux Lite `.deb` that uses the maintained system browser in application mode and stores only the backend URL.
 - GitHub Actions for linting, tests, migrations, Android APK, Linux package, credential scanning, and signed tagged releases.
-- Render Blueprint for a paid web service and managed PostgreSQL. Paid plans are intentional: production data and availability must not depend on an ephemeral free instance.
+- Render Blueprint for a free preview web service and managed PostgreSQL. The free resources are intended for evaluation and personal use; upgrade them before relying on TUESDAY as an always-on production service.
 
 ## Repository map
 

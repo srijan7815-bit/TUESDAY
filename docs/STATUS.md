@@ -12,7 +12,7 @@
 | Models | NVIDIA OpenAI-compatible adapter, development mock blocked in production |
 | Remote desktop | Current E2B Desktop adapter with lifecycle, shell, files, screenshots, and GUI input; idle reaper |
 | Safety | One-use exact approvals, workspace path jail, server-only credentials, production fail-closed validation |
-| Render | Paid Blueprint, managed PostgreSQL, non-root Docker image, migration-on-start, readiness health path |
+| Render | Free preview Blueprint, managed PostgreSQL, non-root Docker image, migration-on-start, readiness health path |
 | Android | API 26–36 native client source, URL policy tests, secure WebView, CI APK and signed tag workflow |
 | Linux Lite | HTTPS-only system-browser launcher, desktop entry, installable `.deb`, checksum and release workflow |
 | GitHub | CI, release workflow, Dependabot, credential scan, contribution and security policy |

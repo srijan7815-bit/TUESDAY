@@ -1,6 +1,6 @@
 # Deploy the backend on Render
 
-The root `render.yaml` defines a Docker web service and a managed PostgreSQL database. It uses paid `starter` and `basic-256mb` plans because production should not rely on a sleeping service or ephemeral local filesystem.
+The root `render.yaml` defines a Docker web service and a managed PostgreSQL database using Render's free instance types. This avoids a paid service plan for evaluation and personal use. It is not an always-on production topology: the web service can spin down when idle, and a free Render Postgres database expires after 30 days.
 
 ## 1. Prepare GitHub
 
@@ -26,11 +26,13 @@ openssl rand -hex 32   # use as TUESDAY_ACCESS_TOKEN
 ## 3. Apply the Blueprint
 
 1. In Render, choose **New → Blueprint** and connect the GitHub repository.
-2. Confirm the `render.yaml` plan and region choices.
+2. Confirm that both resources use the `free` plan and choose the same region.
 3. Enter the prompted values for `TUESDAY_ACCESS_TOKEN`, `NVIDIA_API_KEY`, and `E2B_API_KEY`.
 4. Apply the Blueprint. Render runs the Blueprint `preDeployCommand` (`alembic upgrade head`) before it replaces the live service.
 
 The service automatically receives the PostgreSQL connection string and Render's `PORT`. Production validation refuses to start if the database, credentials, access controls, or sandbox provider are unsafe.
+
+The free database is temporary. Export any data you need before its 30-day expiration, or move the database to Neon or a paid Render plan. Upgrade the web service before relying on availability guarantees.
 
 If you add a custom domain, append its hostname to `TUESDAY_ALLOWED_HOSTS` before sending traffic to it.
 
@@ -60,6 +62,8 @@ Speech-to-text is intentionally endpoint-configurable because NVIDIA speech depl
 ## Operations
 
 - Configure Render deploys to require successful GitHub checks, as expressed by `autoDeployTrigger: checksPass`.
+- Expect a cold start after the free web service has been idle. Free-instance availability is suitable for evaluation, not an uptime commitment.
+- Back up or migrate PostgreSQL data before the free database expires after 30 days.
 - Watch `/health/ready`, application errors, PostgreSQL capacity, and E2B usage.
 - Database records persist in PostgreSQL. Temporary upload staging under `/tmp` may be lost on a restart; durable artifacts belong in the remote E2B workspace or a future object-storage adapter.
 - Roll back the web service from Render if a deployment fails, but never downgrade the database without reviewing the migration first.
