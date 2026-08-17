@@ -5,4 +5,11 @@
     <string name="setup_explanation">Enter the HTTPS address of your TUESDAY backend. Provider keys remain on the server.</string>
     <string name="save_and_open">Save and open</string>
     <string name="invalid_url">Enter a valid HTTPS URL without a path, query, or fragment.</string>
+    <string name="connection_error_retry">%1$s\n\nTap to retry.</string>
+    <string name="no_browser_available">No browser is available for this link</string>
+    <string name="server_settings">Server settings</string>
+    <string name="close_app">Close app</string>
+    <string name="cancel">Cancel</string>
+    <string name="backend_unavailable">TUESDAY backend is unavailable: %1$s</string>
+    <string name="tls_verification_failed">TLS verification failed. Check the backend address and certificate.</string>
 </resources>

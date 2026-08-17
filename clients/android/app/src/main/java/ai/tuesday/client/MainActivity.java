@@ -120,7 +120,7 @@ public final class MainActivity extends Activity {
     }
 
     private void showConnectionError(String message) {
-        errorView.setText(message + "\n\nTap to retry.");
+        errorView.setText(getString(R.string.connection_error_retry, message));
         errorView.setVisibility(View.VISIBLE);
     }
 
@@ -128,7 +128,7 @@ public final class MainActivity extends Activity {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (ActivityNotFoundException error) {
-            Toast.makeText(this, "No browser is available for this link", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.no_browser_available, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -176,8 +176,12 @@ public final class MainActivity extends Activity {
             return;
         }
         new AlertDialog.Builder(this)
-                .setTitle("TUESDAY")
-                .setItems(new String[]{"Server settings", "Close app", "Cancel"}, (dialog, which) -> {
+                .setTitle(R.string.app_name)
+                .setItems(new String[]{
+                    getString(R.string.server_settings),
+                    getString(R.string.close_app),
+                    getString(R.string.cancel)
+                }, (dialog, which) -> {
                     if (which == 0) openSetup();
                     else if (which == 1) finish();
                 })
@@ -239,13 +243,15 @@ public final class MainActivity extends Activity {
 
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-            if (request.isForMainFrame()) showConnectionError("TUESDAY backend is unavailable: " + error.getDescription());
+            if (request.isForMainFrame()) {
+                showConnectionError(getString(R.string.backend_unavailable, error.getDescription()));
+            }
         }
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             handler.cancel();
-            showConnectionError("TLS verification failed. Check the backend address and certificate.");
+            showConnectionError(getString(R.string.tls_verification_failed));
         }
     }
 
