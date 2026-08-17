@@ -4,7 +4,11 @@ plugins {
 
 android {
     namespace = "ai.tuesday.client"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 0
+        }
+    }
 
     buildFeatures {
         buildConfig = true
@@ -12,8 +16,12 @@ android {
 
     defaultConfig {
         applicationId = "ai.tuesday.client"
-        minSdk = 26
-        targetSdk = 37
+        minSdk {
+            version = release(26)
+        }
+        targetSdk {
+            version = release(37)
+        }
         versionCode = 10000
         versionName = "1.0.0"
         testInstrumentationRunner = "android.test.InstrumentationTestRunner"
