@@ -320,7 +320,7 @@ public final class MainActivity extends Activity {
                     MainActivity.this, Environment.DIRECTORY_DOWNLOADS, filename);
             DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
             manager.enqueue(request);
-            Toast.makeText(MainActivity.this, "Artifact download started", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, R.string.artifact_download_started, Toast.LENGTH_SHORT).show();
         }
     }
 }

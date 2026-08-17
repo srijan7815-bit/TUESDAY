@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "ai.tuesday.client"
-    compileSdk = 36
+    compileSdk = 37
 
     buildFeatures {
         buildConfig = true
@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId = "ai.tuesday.client"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 10000
         versionName = "1.0.0"
         testInstrumentationRunner = "android.test.InstrumentationTestRunner"
@@ -64,6 +64,8 @@ android {
         checkReleaseBuilds = true
         warningsAsErrors = true
         disable += setOf("UnusedResources")
+        textReport = true
+        textOutput = layout.buildDirectory.file("reports/lint-results.txt").get().asFile
     }
 }
 

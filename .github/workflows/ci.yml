@@ -73,14 +73,21 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@v3
-      - name: Install Android SDK 36
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Install Android SDK 37
+        run: sdkmanager "platforms;android-37" "build-tools;37.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.13"
       - name: Test, lint, and build APK
         working-directory: clients/android
-        run: gradle --no-daemon testDebugUnitTest lintDebug assembleDebug
+        run: |
+          set +e
+          gradle --no-daemon testDebugUnitTest lintDebug assembleDebug
+          task_status=$?
+          if [[ $task_status -ne 0 && -f app/build/reports/lint-results.txt ]]; then
+            sed -n '1,260p' app/build/reports/lint-results.txt
+          fi
+          exit "$task_status"
       - uses: actions/upload-artifact@v4
         with:
           name: tuesday-android-debug

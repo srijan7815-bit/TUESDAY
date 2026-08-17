@@ -12,4 +12,5 @@
     <string name="cancel">Cancel</string>
     <string name="backend_unavailable">TUESDAY backend is unavailable: %1$s</string>
     <string name="tls_verification_failed">TLS verification failed. Check the backend address and certificate.</string>
+    <string name="artifact_download_started">Artifact download started</string>
 </resources>
